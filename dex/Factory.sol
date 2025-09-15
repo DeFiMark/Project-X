@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.14;
+pragma solidity 0.8.28;
 
 interface IFactory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);

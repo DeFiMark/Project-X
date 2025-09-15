@@ -30,3 +30,16 @@ contract Cloneable {
     }
 
 }
+
+interface IInitializable {
+    function __init__(bytes calldata initData) external;
+}
+
+contract Generator {
+
+    function generateClone(address implementation, bytes calldata initData) external returns (address clone) {
+        clone = Cloneable(implementation).clone();
+        IInitializable(clone).__init__(initData);
+    }
+
+}

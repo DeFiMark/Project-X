@@ -1,4 +1,5 @@
-pragma solidity >=0.8.0;
+//SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
 pragma experimental ABIEncoderV2;
 
 /// @title Multicall2 - Aggregate results from multiple read-only function calls
