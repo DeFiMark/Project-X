@@ -32,9 +32,16 @@ contract StandardTokenData {
     // owner
     address public owner;
 
+    // metadata url
+    string public imageUri;
+
+    // metadata description
+    string public description;
+
     // events
     event SetBalanceLogger(address logger);
     event SetTransferLogger(address logger);
+    event SetImageUri(string imageUri);
     event SetOwner(address owner);
 
     modifier onlyOwner() {
@@ -57,8 +64,10 @@ contract StandardToken is IERC20, StandardTokenData {
             string memory symbol_,
             address balanceLogger_,
             address transferLogger_,
+            string memory imageUri_,
+            string memory description_,
             address owner_
-        ) = abi.decode(initalizeData, (string, string, address, address, address));
+        ) = abi.decode(initalizeData, (string, string, address, address, string, string, address));
 
         // set initial token data
         _name = name_;
@@ -67,6 +76,10 @@ contract StandardToken is IERC20, StandardTokenData {
         // set logger
         balanceLogger = balanceLogger_;
         transferLogger = transferLogger_;
+
+        // set metadata
+        imageUri = imageUri_;
+        description = description_;
 
         // set owner
         owner = owner_;
@@ -151,6 +164,11 @@ contract StandardToken is IERC20, StandardTokenData {
     function setTransferLogger(address transferLogger_) external onlyOwner {
         transferLogger = transferLogger_;
         emit SetTransferLogger(transferLogger_);
+    }
+
+    function setImageUri(string memory imageUri_) external onlyOwner {
+        imageUri = imageUri_;
+        emit SetImageUri(imageUri_);
     }
 
     function burn(uint256 amount) external returns (bool) {

@@ -393,11 +393,19 @@ contract Pair is IPair {
 contract DEXFactory is IFactory {
     bytes32 public constant override INIT_CODE_PAIR_HASH = keccak256(abi.encodePacked(type(Pair).creationCode));
 
+    // create feeTo and feeToSetter
     address public override feeTo;
     address public override feeToSetter;
 
+    // create mapping for pairs
     mapping(address => mapping(address => address)) public override getPair;
     address[] public override allPairs;
+
+    // create mapping for backing-assets
+    mapping ( address => bool ) public isBackingAsset;
+
+    // Event for setting backing-assets
+    event SetBackingAsset(address token, bool isBackingAsset);
 
     constructor(address _feeToSetter) {
         feeToSetter = _feeToSetter;
@@ -411,6 +419,10 @@ contract DEXFactory is IFactory {
         require(tokenA != tokenB, 'DEX: IDENTICAL_ADDRESSES');
         (address token0, address token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
         require(token0 != address(0), 'DEX: ZERO_ADDRESS');
+
+        // require either tokenA or tokenB is a backing asset, but not both
+        require(isBackingAsset[tokenA] != isBackingAsset[tokenB], 'DEX: NOT_BACKING_ASSETS');
+
         require(getPair[token0][token1] == address(0), 'DEX: PAIR_EXISTS'); // single check is sufficient
         bytes memory bytecode = type(Pair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
@@ -421,6 +433,8 @@ contract DEXFactory is IFactory {
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair; // populate mapping in the reverse direction
         allPairs.push(pair);
+
+        // emit pair created
         emit PairCreated(token0, token1, pair, allPairs.length);
     }
 
@@ -432,6 +446,12 @@ contract DEXFactory is IFactory {
     function setFeeToSetter(address _feeToSetter) external override {
         require(msg.sender == feeToSetter, 'DEX: FORBIDDEN');
         feeToSetter = _feeToSetter;
+    }
+
+    function setBackingAsset(address token, bool isBackingAsset_) external {
+        require(msg.sender == feeToSetter, 'DEX: FORBIDDEN');
+        isBackingAsset[token] = isBackingAsset_;
+        emit SetBackingAsset(token, isBackingAsset_);
     }
 
     function paginatePairs(uint start, uint end) external view returns (address[] memory) {
